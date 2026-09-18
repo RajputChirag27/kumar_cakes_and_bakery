@@ -8,26 +8,26 @@ import Footer from "@/components/Footer";
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen bg-[#faf9f6] text-[#1c1c1c] selection:bg-[#ede5da] selection:text-[#1c1c1c]">
-      {/* 1. Minimalist Glass Navigation Bar */}
+    <main className="relative min-h-screen bg-[#0c0908] text-[#f5f5f0] selection:bg-[#d4a359] selection:text-[#0c0908] w-full overflow-x-clip">
+      {/* 1. Fixed Luxury Navigation Bar */}
       <Navbar />
 
-      {/* 2. Merged Hero & Video Scroll Canvas (Top of Screen, h-[300vh]) */}
+      {/* 2. Merged Hero & Video Scroll Canvas (Top of Screen, Fullscreen Cover, Progressive Frame Loader) */}
       <DynamicScrollCanvas />
 
-      {/* 3. Clean Infinite Marquee (Stark white, bold charcoal text) */}
+      {/* 3. High-End Dark Luxury Infinite Marquee */}
       <InfiniteMarquee />
 
-      {/* 4. Floating Light-Themed Bento Grid Menu */}
+      {/* 4. Dark Glassmorphism Bento Grid Menu */}
       <BentoGridMenu />
 
-      {/* 5. Immersive Bright Studio 3D Cake Studio */}
+      {/* 5. Lazy-Loaded 3D Cake Studio (Three.js / React Three Fiber) */}
       <Dynamic3DViewer />
 
-      {/* 6. Hathras Heritage & Verified Reviews */}
+      {/* 6. Hathras Local Heritage, Guarantees & Reviews */}
       <LocalHeritage />
 
-      {/* 7. Minimalist Warm Light Bakehouse Footer */}
+      {/* 7. Deep Dark Roast Bakehouse Footer */}
       <Footer />
     </main>
   );

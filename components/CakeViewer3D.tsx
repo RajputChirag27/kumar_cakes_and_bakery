@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, useRef } from "react";
+import React, { useState, Suspense, useRef, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import {
   useGLTF,
@@ -20,10 +20,9 @@ import {
   MessageSquare,
   BadgePercent,
   CheckCircle2,
+  Box,
 } from "lucide-react";
 import confetti from "canvas-confetti";
-
-useGLTF.preload("/cake_1.glb");
 
 function CakeModel({ frostingColor }: { frostingColor: string }) {
   const { scene } = useGLTF("/cake_1.glb");
@@ -52,9 +51,9 @@ function CakeModel({ frostingColor }: { frostingColor: string }) {
 
 function Loader3D() {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0c0908]/80 backdrop-blur-sm z-10">
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0c0908]/85 backdrop-blur-sm z-10">
       <div className="w-10 h-10 rounded-full border-2 border-[#d4a359]/20 border-t-[#d4a359] animate-spin" />
-      <span className="font-serif text-[11px] sm:text-xs text-[#f5cb88] font-semibold mt-3 tracking-widest uppercase">
+      <span className="font-serif text-xs text-[#f5cb88] font-semibold mt-3 tracking-widest uppercase">
         Loading 3D Confection...
       </span>
       <span className="text-[10px] text-[#e0dad0]/60 mt-0.5">Drag to rotate 360°</span>
@@ -90,12 +89,35 @@ const toppings = [
 ];
 
 export default function CakeViewer3D() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
   const [selectedFlavor, setSelectedFlavor] = useState(flavors[0]);
   const [selectedTier, setSelectedTier] = useState(tiers[1]);
   const [selectedFrosting, setSelectedFrosting] = useState(frostingColors[1]);
   const [selectedToppings, setSelectedToppings] = useState<string[]>(["gold-leaf"]);
   const [customText, setCustomText] = useState("Happy Celebration!");
   const [autoRotate, setAutoRotate] = useState(true);
+
+  // Lazy loading 3D section via IntersectionObserver: only loads heavy 3D engine when near viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "350px" }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const toggleTopping = (id: string) => {
     setSelectedToppings((prev) =>
@@ -140,16 +162,17 @@ export default function CakeViewer3D() {
   return (
     <section
       id="3d-studio"
-      className="relative py-16 sm:py-24 lg:py-32 bg-[#0c0908] text-[#f5f5f0] overflow-hidden"
+      ref={sectionRef}
+      className="relative py-16 sm:py-24 lg:py-32 bg-[#0c0908] text-[#f5f5f0] overflow-hidden w-full max-w-full"
     >
       {/* 1px Gold Gradient Section Divider */}
       <div className="divider-gold-gradient absolute top-0 left-0" />
 
       {/* Ambient background glow */}
-      <div className="absolute top-0 right-0 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-[#d4a359]/8 rounded-full blur-[140px] sm:blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-[#c68642]/6 rounded-full blur-[120px] sm:blur-[140px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-[#d4a359]/8 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-[#c68642]/6 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full max-w-full">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full border border-[#d4a359]/35 bg-[#1b120c]/90 backdrop-blur-md shadow-lg mb-3 sm:mb-4">
@@ -193,49 +216,59 @@ export default function CakeViewer3D() {
               </button>
             </div>
 
-            {/* Three.js Canvas */}
+            {/* Lazy-Loaded Three.js Canvas */}
             <div className="w-full h-full relative cursor-grab active:cursor-grabbing touch-none">
-              <Suspense fallback={<Loader3D />}>
-                <Canvas
-                  shadows
-                  camera={{ position: [0, 1.8, 4.5], fov: 42 }}
-                  className="w-full h-full"
-                >
-                  <ambientLight intensity={1.2} />
-                  <directionalLight
-                    position={[5, 8, 5]}
-                    intensity={1.8}
-                    castShadow
-                    shadow-mapSize={[1024, 1024]}
-                  />
-                  <directionalLight position={[-5, 4, -4]} intensity={0.9} color="#ffd8a8" />
-                  <pointLight position={[0, 4, 2]} intensity={0.8} color="#d4a359" />
+              {isInView ? (
+                <Suspense fallback={<Loader3D />}>
+                  <Canvas
+                    shadows
+                    camera={{ position: [0, 1.8, 4.5], fov: 42 }}
+                    className="w-full h-full"
+                  >
+                    <ambientLight intensity={1.2} />
+                    <directionalLight
+                      position={[5, 8, 5]}
+                      intensity={1.8}
+                      castShadow
+                      shadow-mapSize={[1024, 1024]}
+                    />
+                    <directionalLight position={[-5, 4, -4]} intensity={0.9} color="#ffd8a8" />
+                    <pointLight position={[0, 4, 2]} intensity={0.8} color="#d4a359" />
 
-                  <Float speed={1.1} rotationIntensity={0.15} floatIntensity={0.25}>
-                    <CakeModel frostingColor={selectedFrosting.hex} />
-                  </Float>
+                    <Float speed={1.1} rotationIntensity={0.15} floatIntensity={0.25}>
+                      <CakeModel frostingColor={selectedFrosting.hex} />
+                    </Float>
 
-                  <ContactShadows
-                    position={[0, -1.2, 0]}
-                    opacity={0.6}
-                    scale={8}
-                    blur={2.5}
-                    far={4}
-                    color="#000000"
-                  />
+                    <ContactShadows
+                      position={[0, -1.2, 0]}
+                      opacity={0.6}
+                      scale={8}
+                      blur={2.5}
+                      far={4}
+                      color="#000000"
+                    />
 
-                  <OrbitControls
-                    enableZoom={true}
-                    enableRotate={true}
-                    enablePan={false}
-                    autoRotate={autoRotate}
-                    autoRotateSpeed={1.4}
-                    minDistance={2.4}
-                    maxDistance={6.5}
-                    maxPolarAngle={Math.PI / 2 + 0.15}
-                  />
-                </Canvas>
-              </Suspense>
+                    <OrbitControls
+                      enableZoom={true}
+                      enableRotate={true}
+                      enablePan={false}
+                      autoRotate={autoRotate}
+                      autoRotateSpeed={1.4}
+                      minDistance={2.4}
+                      maxDistance={6.5}
+                      maxPolarAngle={Math.PI / 2 + 0.15}
+                    />
+                  </Canvas>
+                </Suspense>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#140e0a]">
+                  <Box className="w-8 h-8 text-[#d4a359] animate-pulse mb-2" />
+                  <span className="font-serif text-xs text-[#f5cb88] tracking-widest uppercase">
+                    3D Studio Ready
+                  </span>
+                  <span className="text-[10px] text-[#dcd7ce]/60 mt-0.5">Scroll to enter</span>
+                </div>
+              )}
             </div>
 
             {/* Bottom 3D instruction */}

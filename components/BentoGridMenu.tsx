@@ -93,7 +93,7 @@ const bentoItems: BentoItem[] = [
 
 export default function BentoGridMenu() {
   return (
-    <section id="bento-menu" className="relative py-16 sm:py-24 lg:py-32 bg-[#0c0908] text-[#f5f5f0]">
+    <section id="bento-menu" className="relative py-16 sm:py-24 lg:py-32 bg-[#0c0908] text-[#f5f5f0] overflow-hidden">
       {/* 1px Gold Gradient Section Divider */}
       <div className="divider-gold-gradient absolute top-0 left-0" />
 
