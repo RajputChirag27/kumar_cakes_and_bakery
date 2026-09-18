@@ -96,9 +96,7 @@ export default function ScrollCanvasAnimation() {
     const drawX = (width - drawW) / 2;
     const drawY = (height - drawH) / 2;
 
-    // Draw the image edge-to-edge
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
     ctx.restore();
   };
 
@@ -134,7 +132,7 @@ export default function ScrollCanvasAnimation() {
     renderImageCover(ctx, canvas, img);
   }, []);
 
-  // Resize canvas
+  // Resize canvas responsively
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -157,7 +155,11 @@ export default function ScrollCanvasAnimation() {
   useEffect(() => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
-    return () => window.removeEventListener("resize", resizeCanvas);
+    window.addEventListener("orientationchange", resizeCanvas);
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("orientationchange", resizeCanvas);
+    };
   }, [resizeCanvas]);
 
   // Scroll listener
@@ -224,7 +226,7 @@ export default function ScrollCanvasAnimation() {
     <div
       id="scroll-craft"
       ref={containerRef}
-      className="relative h-[300vh] bg-[#0c0908]"
+      className="relative h-[280vh] sm:h-[300vh] bg-[#0c0908]"
     >
       {/* Sticky Fullscreen Canvas Viewport */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
@@ -235,33 +237,33 @@ export default function ScrollCanvasAnimation() {
         />
 
         {/* Layer z-10: Cinematic Vignette & Fade Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0908]/80 via-transparent to-[#0c0908] pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0908]/85 via-[#0c0908]/20 to-[#0c0908] pointer-events-none z-10" />
 
         {/* Loading Spinner */}
         {!isLoaded && (
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0c0908]">
-            <div className="w-14 h-14 rounded-full border-2 border-[#d4a359]/20 border-t-[#d4a359] animate-spin mb-3" />
-            <span className="font-serif text-sm tracking-widest text-[#f5cb88] uppercase font-semibold">
+            <div className="w-12 h-12 rounded-full border-2 border-[#d4a359]/20 border-t-[#d4a359] animate-spin mb-3" />
+            <span className="font-serif text-xs sm:text-sm tracking-widest text-[#f5cb88] uppercase font-semibold">
               Preparing Culinary Canvas...
             </span>
           </div>
         )}
 
         {/* ---------------------------------------------------- */}
-        {/* Layer z-20: Floating Hero Text with Warm Gold Glow   */}
+        {/* Layer z-20: Responsive Floating Hero Text            */}
         {/* ---------------------------------------------------- */}
         <div
-          className={`absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-4 sm:pb-6 px-4 sm:px-8 max-w-7xl mx-auto w-full transition-all duration-700 pointer-events-none ${
+          className={`absolute inset-0 z-20 flex flex-col justify-between pt-16 sm:pt-24 pb-2 sm:pb-6 px-3 sm:px-8 max-w-7xl mx-auto w-full transition-all duration-700 pointer-events-none ${
             scrollProgress < 0.28
               ? "opacity-100 translate-y-0"
-              : "opacity-0 -translate-y-8"
+              : "opacity-0 -translate-y-6 pointer-events-none"
           }`}
         >
           {/* Top Hero Text */}
-          <div className="flex flex-col items-center text-center mt-2 sm:mt-6 pointer-events-auto relative">
+          <div className="flex flex-col items-center text-center mt-1 sm:mt-4 pointer-events-auto relative px-2">
             {/* Soft Warm Gold radial glow behind text */}
             <div
-              className="absolute -inset-x-24 -inset-y-16 rounded-full pointer-events-none -z-10"
+              className="absolute -inset-x-12 sm:-inset-x-24 -inset-y-10 sm:-inset-y-16 rounded-full pointer-events-none -z-10"
               style={{
                 background:
                   "radial-gradient(ellipse at center, rgba(212,163,89,0.22) 0%, rgba(198,134,66,0.08) 45%, transparent 75%)",
@@ -269,46 +271,46 @@ export default function ScrollCanvasAnimation() {
             />
 
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d4a359]/35 bg-[#1b120c]/85 backdrop-blur-md shadow-lg shadow-black/40 mb-5 group hover:border-[#d4a359] transition-all">
-              <Sparkles className="w-3.5 h-3.5 text-[#d4a359] animate-pulse" />
-              <span className="text-[10px] sm:text-xs tracking-[0.25em] font-semibold text-[#f5cb88] uppercase">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-[#d4a359]/35 bg-[#1b120c]/90 backdrop-blur-md shadow-md mb-3 sm:mb-4 group hover:border-[#d4a359] transition-all">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#d4a359] animate-pulse" />
+              <span className="text-[9px] sm:text-xs tracking-[0.2em] font-semibold text-[#f5cb88] uppercase">
                 HATHRAS PREMIER BAKERY
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#d4a359]" />
-              <span className="text-[10px] sm:text-xs text-[#dcd7ce]/80 font-normal">
+              <span className="w-1 h-1 rounded-full bg-[#d4a359]" />
+              <span className="text-[9px] sm:text-xs text-[#dcd7ce]/80 font-normal">
                 100% Eggless
               </span>
             </div>
 
             {/* Headline */}
-            <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-cream-glow leading-[1.08] max-w-4xl">
+            <h1 className="font-serif text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[#fffbf5] leading-[1.12] sm:leading-[1.08] max-w-3xl drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#fffbf5] via-[#faede0] to-[#d4a359]">
                 Handcrafted
               </span>{" "}
-              <br className="hidden sm:inline" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#faede0] via-[#e5ba73] to-[#c68642]">
+              <br className="inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#faede0] via-[#f5cb88] to-[#c68642]">
                 Celebration Cakes
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="mt-3.5 text-xs sm:text-sm md:text-base text-[#dcd7ce] max-w-xl font-light leading-relaxed">
+            <p className="mt-2.5 sm:mt-3.5 text-xs sm:text-sm md:text-base text-[#e5dfd5] max-w-lg font-light leading-relaxed px-2">
               Bespoke multi-tiered wedding cakes, Belgian chocolate truffles, and
               handcrafted celebration centerpieces created with love in Hathras.
             </p>
 
             {/* Action Buttons */}
-            <div className="mt-6 flex items-center gap-3.5">
+            <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 w-full">
               <a
                 href="#3d-studio"
-                className="px-8 py-3.5 rounded-full btn-gold-gradient text-xs uppercase tracking-wider font-bold shadow-xl flex items-center gap-2 group cursor-pointer"
+                className="px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full btn-gold-gradient text-[11px] sm:text-xs uppercase tracking-wider font-bold shadow-xl flex items-center gap-1.5 sm:gap-2 group cursor-pointer"
               >
                 <span>Order Custom Cake</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </a>
               <a
                 href="#bento-menu"
-                className="px-6 py-3.5 rounded-full btn-dark-minimal text-xs uppercase tracking-wider font-medium shadow-md"
+                className="px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-full btn-dark-minimal text-[11px] sm:text-xs uppercase tracking-wider font-medium shadow-md"
               >
                 <span>Discover Menu</span>
               </a>
@@ -316,65 +318,65 @@ export default function ScrollCanvasAnimation() {
           </div>
 
           {/* Bottom Brand Anchor "KUMAR'S" */}
-          <div className="w-full text-center pointer-events-auto relative mt-auto">
+          <div className="w-full text-center pointer-events-auto relative mt-auto pb-1">
             <div
-              className="absolute -inset-x-12 -bottom-4 h-36 rounded-t-3xl pointer-events-none -z-10"
+              className="absolute -inset-x-8 sm:-inset-x-12 -bottom-2 h-28 sm:h-36 rounded-t-3xl pointer-events-none -z-10"
               style={{
                 background:
                   "radial-gradient(ellipse at bottom center, rgba(12,9,8,0.95) 0%, rgba(12,9,8,0.7) 60%, transparent 95%)",
               }}
             />
 
-            <span className="font-serif font-extrabold tracking-[-0.03em] sm:tracking-[0.01em] select-none text-[18vw] sm:text-[16vw] md:text-[15vw] leading-[0.82] text-transparent bg-clip-text bg-gradient-to-b from-[#fffbf5] via-[#faede0] to-[#bca07e] drop-shadow-[0_12px_45px_rgba(212,163,89,0.3)] block w-full text-center">
+            <span className="font-serif font-extrabold tracking-[-0.02em] sm:tracking-[0.01em] select-none text-[17vw] sm:text-[16vw] md:text-[15vw] leading-[0.85] text-transparent bg-clip-text bg-gradient-to-b from-[#fffbf5] via-[#faede0] to-[#bca07e] drop-shadow-[0_8px_35px_rgba(212,163,89,0.3)] block w-full text-center">
               KUMAR&apos;S
             </span>
-            <div className="flex items-center justify-between w-full max-w-4xl mx-auto px-4 pt-1 text-[9px] sm:text-xs uppercase tracking-[0.35em] text-[#d4a359]/80 font-medium">
-              <span>Bespoke Confectionery</span>
+            <div className="flex items-center justify-between w-full max-w-4xl mx-auto px-3 sm:px-4 pt-1 text-[8px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.35em] text-[#d4a359]/90 font-medium">
+              <span>Fine Confectionery</span>
               <span>•</span>
-              <span>Hathras, Uttar Pradesh</span>
+              <span>Hathras, UP</span>
               <span>•</span>
-              <span className="flex items-center gap-1">
-                Scroll to explore <ChevronDown className="w-3 h-3 animate-bounce" />
+              <span className="flex items-center gap-0.5 sm:gap-1">
+                Scroll <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 animate-bounce" />
               </span>
             </div>
           </div>
         </div>
 
         {/* ---------------------------------------------------- */}
-        {/* MILESTONE STORY OVERLAYS (Appear during scroll)       */}
+        {/* MILESTONE STORY OVERLAYS                             */}
         {/* ---------------------------------------------------- */}
 
         {/* Frame Tracker HUD */}
         <div
-          className={`absolute top-20 right-6 sm:right-12 z-20 pointer-events-none transition-opacity duration-300 ${
+          className={`absolute top-16 sm:top-20 right-3 sm:right-12 z-20 pointer-events-none transition-opacity duration-300 ${
             scrollProgress > 0.22 ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="px-3.5 py-1.5 rounded-full bg-[#1b120c]/85 backdrop-blur-md border border-[#d4a359]/30 shadow-lg flex items-center gap-2.5 text-xs text-[#f5f5f0]">
-            <Layers className="w-3.5 h-3.5 text-[#d4a359]" />
-            <span className="font-mono text-[11px] font-semibold text-[#f5cb88]">
-              Frame {Math.min(TOTAL_FRAMES, Math.round(currentFrameRef.current + 1))} / {TOTAL_FRAMES}
+          <div className="px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-[#1b120c]/90 backdrop-blur-md border border-[#d4a359]/35 shadow-lg flex items-center gap-1.5 sm:gap-2.5 text-[10px] sm:text-xs text-[#f5f5f0]">
+            <Layers className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#d4a359]" />
+            <span className="font-mono font-semibold text-[#f5cb88]">
+              {Math.min(TOTAL_FRAMES, Math.round(currentFrameRef.current + 1))} / {TOTAL_FRAMES}
             </span>
           </div>
         </div>
 
         {/* Milestone 1: 28% - 55% */}
         <div
-          className={`absolute bottom-20 left-6 sm:left-16 z-20 max-w-md transition-all duration-500 pointer-events-none ${
+          className={`absolute bottom-10 sm:bottom-20 left-3 right-3 sm:right-auto sm:left-16 z-20 max-w-md transition-all duration-500 pointer-events-none ${
             scrollProgress >= 0.28 && scrollProgress < 0.58
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-6"
           }`}
         >
-          <div className="p-6 rounded-3xl glass-dark shadow-2xl">
-            <div className="flex items-center gap-2 text-[#d4a359] text-xs font-semibold tracking-wider uppercase mb-1">
-              <Sparkles className="w-4 h-4" />
+          <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl glass-dark shadow-2xl">
+            <div className="flex items-center gap-1.5 text-[#d4a359] text-[10px] sm:text-xs font-semibold tracking-wider uppercase mb-1">
+              <Sparkles className="w-3.5 h-3.5" />
               <span>Phase 01 • Cloud Sponge Alchemy</span>
             </div>
-            <h3 className="font-serif text-xl sm:text-2xl text-[#f5f5f0] font-bold">
+            <h3 className="font-serif text-lg sm:text-2xl text-[#fffbf5] font-bold">
               Slow-Baked Sponge
             </h3>
-            <p className="text-xs sm:text-sm text-[#dcd7ce] mt-1.5 leading-relaxed font-light">
+            <p className="text-xs sm:text-sm text-[#e0dad0] mt-1 sm:mt-1.5 leading-relaxed font-light">
               Infused with pure Madagascar vanilla and organic cocoa, whipped to
               airy perfection for a melt-in-the-mouth texture.
             </p>
@@ -383,21 +385,21 @@ export default function ScrollCanvasAnimation() {
 
         {/* Milestone 2: 58% - 85% */}
         <div
-          className={`absolute bottom-20 right-6 sm:right-16 z-20 max-w-md transition-all duration-500 pointer-events-none ${
+          className={`absolute bottom-10 sm:bottom-20 left-3 sm:left-auto right-3 sm:right-16 z-20 max-w-md transition-all duration-500 pointer-events-none ${
             scrollProgress >= 0.58 && scrollProgress < 0.85
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-6"
           }`}
         >
-          <div className="p-6 rounded-3xl glass-dark shadow-2xl">
-            <div className="flex items-center gap-2 text-[#d4a359] text-xs font-semibold tracking-wider uppercase mb-1">
-              <Flame className="w-4 h-4" />
+          <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl glass-dark shadow-2xl">
+            <div className="flex items-center gap-1.5 text-[#d4a359] text-[10px] sm:text-xs font-semibold tracking-wider uppercase mb-1">
+              <Flame className="w-3.5 h-3.5" />
               <span>Phase 02 • Belgian Truffle Ganache</span>
             </div>
-            <h3 className="font-serif text-xl sm:text-2xl text-[#f5f5f0] font-bold">
+            <h3 className="font-serif text-lg sm:text-2xl text-[#fffbf5] font-bold">
               54% Dark Chocolate Core
             </h3>
-            <p className="text-xs sm:text-sm text-[#dcd7ce] mt-1.5 leading-relaxed font-light">
+            <p className="text-xs sm:text-sm text-[#e0dad0] mt-1 sm:mt-1.5 leading-relaxed font-light">
               Silky ganache folded with toasted hazelnut crunch and warm caramel
               ribbons for deep, luxurious chocolate intensity.
             </p>
@@ -406,21 +408,21 @@ export default function ScrollCanvasAnimation() {
 
         {/* Milestone 3: 85% - 100% */}
         <div
-          className={`absolute bottom-20 left-1/2 -translate-x-1/2 z-20 w-[90%] max-w-lg transition-all duration-500 pointer-events-none text-center ${
+          className={`absolute bottom-10 sm:bottom-20 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto z-20 w-auto sm:w-[90%] sm:max-w-lg transition-all duration-500 pointer-events-none text-left sm:text-center ${
             scrollProgress >= 0.85
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-6"
           }`}
         >
-          <div className="p-6 rounded-3xl glass-dark shadow-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 text-[#d4a359] text-xs font-semibold tracking-wider uppercase mb-1">
-              <Award className="w-4 h-4" />
+          <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl glass-dark shadow-2xl sm:mx-auto">
+            <div className="inline-flex items-center gap-1.5 text-[#d4a359] text-[10px] sm:text-xs font-semibold tracking-wider uppercase mb-1">
+              <Award className="w-3.5 h-3.5" />
               <span>Phase 03 • Crown Jewel Finish</span>
             </div>
-            <h3 className="font-serif text-xl sm:text-2xl text-[#f5f5f0] font-bold">
+            <h3 className="font-serif text-lg sm:text-2xl text-[#fffbf5] font-bold">
               24K Gold Leaf & Edible Florals
             </h3>
-            <p className="text-xs sm:text-sm text-[#dcd7ce] mt-1.5 leading-relaxed font-light">
+            <p className="text-xs sm:text-sm text-[#e0dad0] mt-1 sm:mt-1.5 leading-relaxed font-light">
               Every detail sculpted by master confectioners in Hathras. Your
               celebration deserves nothing less than royal magnificence.
             </p>
