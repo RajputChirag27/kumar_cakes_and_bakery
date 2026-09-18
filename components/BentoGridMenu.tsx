@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   Sparkles,
-  Flame,
   Crown,
-  Heart,
-  Gift,
-  ArrowUpRight,
-  ShieldCheck,
-  Star,
   CheckCircle2,
+  ArrowUpRight,
+  Star,
+  ShieldCheck,
+  Flame,
+  Cake,
+  Gift,
 } from "lucide-react";
 
 interface BentoItem {
@@ -23,205 +23,216 @@ interface BentoItem {
   reviews: string;
   highlights: string[];
   gridClass: string;
-  bgGradient: string;
   badge: string;
-  badgeColor: string;
-  accentGlow: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accentGradient: string;
 }
 
 const bentoItems: BentoItem[] = [
   {
     id: "signature-truffle",
-    category: "Masterpiece",
+    category: "Masterpiece Collection",
     title: "Signature Truffle",
     subtitle:
-      "Our most celebrated indulgence. 54% dark Belgian chocolate ganache folded with roasted hazelnut butter and adorned with 24K edible gold leaf.",
+      "Our premier celebration cake. 54% dark Belgian Callebaut ganache layered with slow-whipped chocolate sponge, roasted hazelnut butter, and 24K edible gold flakes.",
     price: "₹650 / lb",
     rating: 4.9,
-    reviews: "1.2k+ reviews",
+    reviews: "1,200+ reviews",
     highlights: ["Pure Belgian Callebaut", "100% Eggless", "Melt-In-Mouth Texture"],
     gridClass: "lg:col-span-8 lg:row-span-2",
-    bgGradient: "from-[#27170f] via-[#1a100a] to-[#120a06]",
-    badge: "Bestseller #1",
-    badgeColor: "bg-[#d4a359]/20 text-[#f5cb88] border-[#d4a359]/40",
-    accentGlow: "group-hover:border-[#d4a359]/60",
+    badge: "Most Loved in Hathras",
+    icon: Flame,
+    accentGradient: "from-[#d4a359]/20 via-[#c68642]/5 to-transparent",
   },
   {
     id: "custom-3d-cakes",
-    category: "Bespoke Art",
+    category: "Bespoke Artistry",
     title: "Custom 3D Cakes",
     subtitle:
-      "Hand-sculpted fondant centerpieces, multi-tiered royal wedding marvels, and themed birthday creations tailored to your wildest imaginations.",
+      "Hand-sculpted fondant showstoppers, architectural multi-tier wedding centerpieces, and themed birthday spectacles tailored precisely to your imagination.",
     price: "From ₹1,200",
     rating: 5.0,
     reviews: "850+ orders",
-    highlights: ["Custom Theme Sculpting", "Multi-Tier Structural Rig", "Free Design Consult"],
+    highlights: ["Themed Sculpting", "Multi-Tier Rig", "Free Design Consult"],
     gridClass: "lg:col-span-4 lg:row-span-3",
-    bgGradient: "from-[#2f1c13] via-[#1c110b] to-[#100906]",
-    badge: "Showstopper",
-    badgeColor: "bg-[#c68642]/20 text-[#f3d79b] border-[#c68642]/40",
-    accentGlow: "group-hover:border-[#c68642]/70",
+    badge: "Architectural Tiers",
+    icon: Crown,
+    accentGradient: "from-[#c68642]/20 via-[#d4a359]/5 to-transparent",
   },
   {
     id: "pastries-desserts",
-    category: "Gourmet Bites",
+    category: "Daily Confections",
     title: "Pastries & Desserts",
     subtitle:
-      "French style eclairs, layered opera slices, molten chocolate lava cups, and fresh fruit tarts baked fresh every morning in Hathras.",
+      "French-style choux eclairs, layered opera gateaux, molten dark lava cups, and fresh seasonal fruit tarts baked fresh every morning in Hathras.",
     price: "From ₹85 / pc",
     rating: 4.8,
-    reviews: "3.4k+ bites",
-    highlights: ["Freshly Whipped Mousses", "Zero Trans-Fat", "Daily Morning Batches"],
+    reviews: "3,400+ bites",
+    highlights: ["Fresh Whipped Mousses", "Zero Trans-Fat", "Morning Batches"],
     gridClass: "lg:col-span-4 lg:row-span-2",
-    bgGradient: "from-[#23150d] via-[#160d08] to-[#0e0704]",
-    badge: "Daily Fresh",
-    badgeColor: "bg-white/10 text-[#ebdccb] border-white/20",
-    accentGlow: "group-hover:border-[#e5ba73]/50",
+    badge: "Daily Baked",
+    icon: Cake,
+    accentGradient: "from-[#d4a359]/15 via-transparent to-transparent",
   },
   {
     id: "birthday-combos",
-    category: "Celebration Pack",
+    category: "Complete Celebration",
     title: "Birthday Combos",
     subtitle:
-      "Complete joy delivered: Choice of 1kg cake, matching luxury balloon bouquet, glowing sparklers, and handcrafted celebration greeting card.",
+      "The complete surprise: 1kg artisanal cake of choice, premium balloon bouquet, celebration sparklers, and a customized handwritten gold-foil card.",
     price: "Combo ₹999",
     rating: 4.9,
-    reviews: "2.1k+ delivered",
-    highlights: ["Cake + Blooms + Props", "Express Hathras Delivery", "Midnight Surprise"],
+    reviews: "2,100+ delivered",
+    highlights: ["Cake + Blooms + Sparklers", "Express Delivery", "Midnight Surprise"],
     gridClass: "lg:col-span-4 lg:row-span-2",
-    bgGradient: "from-[#2c180e] via-[#190e09] to-[#0f0805]",
-    badge: "Ready-To-Party",
-    badgeColor: "bg-[#d4a359]/25 text-[#fff9f2] border-[#d4a359]/50",
-    accentGlow: "group-hover:border-[#d4a359]/70",
+    badge: "Ready-To-Celebrate",
+    icon: Gift,
+    accentGradient: "from-[#c68642]/18 via-[#d4a359]/5 to-transparent",
   },
 ];
 
 export default function BentoGridMenu() {
-  const [selectedItem, setSelectedItem] = useState<BentoItem | null>(null);
-
   return (
-    <section id="bento-menu" className="relative py-24 sm:py-32 bg-[#0c0806]">
-      {/* Background illumination */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-[#d4a359]/5 blur-[160px] pointer-events-none rounded-full" />
-      <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-[#c68642]/5 blur-[140px] pointer-events-none rounded-full" />
+    <section id="bento-menu" className="relative py-24 sm:py-32 bg-[#0c0908] text-[#f5f5f0]">
+      {/* 1px Gold Gradient Section Divider */}
+      <div className="divider-gold-gradient absolute top-0 left-0" />
+
+      {/* Ambient warm background glow */}
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-[#d4a359]/6 blur-[160px] pointer-events-none rounded-full" />
+      <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-[#c68642]/6 blur-[140px] pointer-events-none rounded-full" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d4a359]/30 bg-[#1a110c] backdrop-blur-sm mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d4a359]/35 bg-[#1b120c]/90 backdrop-blur-md mb-5 shadow-lg">
             <Sparkles className="w-3.5 h-3.5 text-[#d4a359]" />
-            <span className="text-[11px] sm:text-xs tracking-[0.25em] font-semibold text-[#f5cb88] uppercase">
+            <span className="text-[10px] sm:text-xs tracking-[0.25em] font-semibold text-[#f5cb88] uppercase">
               CURATED MENU COLLECTIONS
             </span>
           </div>
-          <h2 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold text-cream-glow">
+
+          {/* Crisp, high-contrast headline */}
+          <h2 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#fffbf5] drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] leading-[1.15]">
             Artisanal Confections,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#faede0] via-[#e5ba73] to-[#c68642]">
-              Infinite Delight
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#faede0] via-[#f5cb88] to-[#d4a359]">
+              Pure Delight
             </span>
           </h2>
-          <p className="mt-4 text-sm sm:text-base text-[#ebdccb]/75 font-light">
-            Every creation is 100% eggless, prepared with imported Belgian
-            chocolate, farm-fresh cream, and master precision.
+
+          {/* Delicate 1px separator line under header */}
+          <div className="w-28 h-[1.5px] bg-gradient-to-r from-transparent via-[#d4a359]/60 to-transparent mx-auto mt-4 mb-4" />
+
+          <p className="text-sm sm:text-base text-[#e5dfd5] font-light max-w-xl mx-auto leading-relaxed">
+            100% vegetarian, crafted with imported Belgian chocolate, farm-fresh dairy,
+            and master precision in Hathras.
           </p>
         </div>
 
-        {/* Asymmetrical Bento Grid */}
+        {/* Dark Glassmorphism Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
-          {bentoItems.map((item) => (
-            <div
-              key={item.id}
-              className={`group relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden border border-[#d4a359]/15 bg-gradient-to-br ${item.bgGradient} backdrop-blur-xl shadow-2xl transition-all duration-500 hover:scale-[1.015] ${item.accentGlow} ${item.gridClass}`}
-            >
-              {/* Subtle top caramel glow on hover */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#d4a359]/15 via-[#c68642]/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          {bentoItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.id}
+                className={`group relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between bg-[#19110b]/75 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-350 hover:shadow-[0_0_35px_rgba(212,163,89,0.2)] hover:border-[#d4a359]/50 hover:-translate-y-1 ${item.gridClass}`}
+              >
+                {/* Subtle top caramel glow accent */}
+                <div
+                  className={`absolute top-0 right-0 w-64 h-64 rounded-bl-full bg-gradient-to-bl ${item.accentGradient} opacity-30 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none -z-10`}
+                />
 
-              {/* Card Header Info */}
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-semibold tracking-wider uppercase ${item.badgeColor}`}
-                  >
-                    {item.badge}
-                  </span>
-                  <div className="flex items-center gap-1 text-xs text-[#ebdccb]/80 bg-black/40 px-2.5 py-1 rounded-full border border-white/5">
-                    <Star className="w-3.5 h-3.5 text-[#d4a359] fill-[#d4a359]" />
-                    <span className="font-semibold text-white">{item.rating}</span>
-                    <span className="text-[10px] text-white/50">({item.reviews})</span>
+                {/* Card Top Info */}
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#d4a359]/35 bg-[#251811] text-[10px] sm:text-[11px] font-semibold tracking-wider text-[#f5cb88] uppercase shadow-xs">
+                      {item.badge}
+                    </span>
+                    <div className="flex items-center gap-1 text-xs text-[#fffbf5] bg-black/50 px-2.5 py-1 rounded-full border border-white/10">
+                      <Star className="w-3.5 h-3.5 text-[#d4a359] fill-[#d4a359]" />
+                      <span className="font-semibold">{item.rating}</span>
+                      <span className="text-[10px] text-[#dcd7ce]/70">({item.reviews})</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-full bg-[#2a1a12] border border-[#d4a359]/30 flex items-center justify-center">
+                      <Icon className="w-3.5 h-3.5 text-[#d4a359]" />
+                    </div>
+                    <span className="text-[10px] font-semibold tracking-widest text-[#d4a359] uppercase">
+                      {item.category}
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#fffbf5] group-hover:text-[#f5cb88] transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#e0dad0] mt-3 leading-relaxed font-light">
+                    {item.subtitle}
+                  </p>
+
+                  {/* Highlights checklist */}
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {item.highlights.map((h, i) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center gap-1.5 text-[11px] text-[#f5f5f0] bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg"
+                      >
+                        <CheckCircle2 className="w-3 h-3 text-[#d4a359]" />
+                        {h}
+                      </span>
+                    ))}
                   </div>
                 </div>
 
-                <div className="text-[11px] font-medium tracking-widest text-[#d4a359] uppercase mb-1">
-                  {item.category}
-                </div>
-                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#fff9f2] group-hover:text-[#f5cb88] transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-xs sm:text-sm text-[#ebdccb]/80 mt-3 leading-relaxed">
-                  {item.subtitle}
-                </p>
-
-                {/* Highlight Checkmarks */}
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {item.highlights.map((h, i) => (
-                    <span
-                      key={i}
-                      className="inline-flex items-center gap-1.5 text-[11px] text-[#faf6f0]/90 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg"
-                    >
-                      <CheckCircle2 className="w-3 h-3 text-[#d4a359]" />
-                      {h}
+                {/* Card Bottom CTA */}
+                <div className="pt-8 mt-6 border-t border-white/10 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#d4a359] block font-medium">
+                      Starting At
                     </span>
-                  ))}
+                    <span className="font-serif text-xl sm:text-2xl font-bold text-[#f5cb88]">
+                      {item.price}
+                    </span>
+                  </div>
+
+                  <a
+                    href={`https://wa.me/919837000000?text=Hello%20Kumar's%20Cakes,%20I'm%20interested%20in%20ordering%20the%20${encodeURIComponent(
+                      item.title
+                    )}!`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#d4a359]/45 bg-[#251811] text-xs font-semibold text-[#fffbf5] group-hover:border-[#d4a359] group-hover:bg-[#d4a359] group-hover:text-[#0c0908] transition-all duration-300 shadow-md"
+                  >
+                    <span>Order Now</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </a>
                 </div>
               </div>
-
-              {/* Card Footer & Order Action */}
-              <div className="pt-8 mt-6 border-t border-white/5 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-[#d4a359]/80 block">
-                    Starting At
-                  </span>
-                  <span className="font-serif text-xl sm:text-2xl font-bold text-[#f5cb88]">
-                    {item.price}
-                  </span>
-                </div>
-
-                <a
-                  href={`https://wa.me/919837000000?text=Hello%20Kumar's%20Cakes,%20I'm%20interested%20in%20ordering%20the%20${encodeURIComponent(
-                    item.title
-                  )}!`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#d4a359]/40 bg-[#251811] text-xs font-semibold text-[#ebdccb] group-hover:border-[#d4a359] group-hover:bg-[#d4a359] group-hover:text-[#0c0806] transition-all duration-300 shadow-md"
-                >
-                  <span>Order Now</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </a>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Dietary Guarantee banner below Bento */}
-        <div className="mt-12 rounded-2xl border border-[#d4a359]/20 bg-[#160e0a]/80 p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#2a1b14] border border-[#d4a359]/40 flex items-center justify-center shrink-0">
+        <div className="mt-12 rounded-3xl border border-white/10 bg-[#19110b]/75 backdrop-blur-xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-4 text-center sm:text-left">
+            <div className="w-12 h-12 rounded-full bg-[#2a1a12] border border-[#d4a359]/40 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-6 h-6 text-[#d4a359]" />
             </div>
             <div>
-              <h4 className="font-serif text-lg font-bold text-[#fff9f2]">
+              <h4 className="font-serif text-base sm:text-lg font-bold text-[#fffbf5]">
                 100% Pure Vegetarian & Eggless Kitchen
               </h4>
-              <p className="text-xs text-[#ebdccb]/70 mt-0.5">
+              <p className="text-xs text-[#e0dad0] mt-0.5 font-light">
                 Separate sterile prep lines, zero gelatine, certified highest hygienic standards in Hathras.
               </p>
             </div>
           </div>
           <a
             href="#3d-studio"
-            className="shrink-0 px-6 py-2.5 rounded-full btn-gold-gradient text-xs uppercase tracking-wider font-bold"
+            className="shrink-0 px-6 py-2.5 rounded-full btn-gold-gradient text-xs uppercase tracking-wider font-bold shadow-md"
           >
-            Try 3D Customizer
+            Launch 3D Customizer
           </a>
         </div>
       </div>

@@ -1,5 +1,4 @@
 import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
 import DynamicScrollCanvas from "@/components/DynamicScrollCanvas";
 import InfiniteMarquee from "@/components/InfiniteMarquee";
 import BentoGridMenu from "@/components/BentoGridMenu";
@@ -9,29 +8,26 @@ import Footer from "@/components/Footer";
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen bg-[#0c0806] text-[#faf6f0] selection:bg-[#d4a359] selection:text-[#0c0806]">
-      {/* 1. Fixed Luxury Navigation Bar */}
+    <main className="relative min-h-screen bg-[#faf9f6] text-[#1c1c1c] selection:bg-[#ede5da] selection:text-[#1c1c1c]">
+      {/* 1. Minimalist Glass Navigation Bar */}
       <Navbar />
 
-      {/* 2. Hero Section (Tall h-screen with 90vw brand anchor) */}
-      <HeroSection />
-
-      {/* 3. Cinematic HTML5 Canvas Scroll Animation (Client boundary, ssr: false) */}
+      {/* 2. Merged Hero & Video Scroll Canvas (Top of Screen, h-[300vh]) */}
       <DynamicScrollCanvas />
 
-      {/* 4. Infinite Highlight Carousel Marquee */}
+      {/* 3. Clean Infinite Marquee (Stark white, bold charcoal text) */}
       <InfiniteMarquee />
 
-      {/* 5. Asymmetric Bento Grid Menu */}
+      {/* 4. Floating Light-Themed Bento Grid Menu */}
       <BentoGridMenu />
 
-      {/* 6. Immersive 3D Cake Studio (Three.js / React Three Fiber, ssr: false) */}
+      {/* 5. Immersive Bright Studio 3D Cake Studio */}
       <Dynamic3DViewer />
 
-      {/* 7. Hathras Local Heritage, Trust & Reviews */}
+      {/* 6. Hathras Heritage & Verified Reviews */}
       <LocalHeritage />
 
-      {/* 8. Luxury Espresso Bakehouse Footer */}
+      {/* 7. Minimalist Warm Light Bakehouse Footer */}
       <Footer />
     </main>
   );

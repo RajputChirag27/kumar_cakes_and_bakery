@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0d0806",
+  themeColor: "#0c0908",
 };
 
 export default function RootLayout({
@@ -49,7 +49,7 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${plusJakarta.variable} scroll-smooth antialiased`}
     >
-      <body className="min-h-screen bg-[#0c0806] text-[#f7f2ea] font-sans selection:bg-[#d4a359] selection:text-[#0c0806] overflow-x-hidden">
+      <body className="min-h-screen bg-[#0c0908] text-[#f5f5f0] font-sans selection:bg-[#d4a359] selection:text-[#0c0908] overflow-x-hidden">
         {children}
       </body>
     </html>

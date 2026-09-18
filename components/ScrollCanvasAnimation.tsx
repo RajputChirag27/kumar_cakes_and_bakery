@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Sparkles, Layers, ShieldCheck, Flame } from "lucide-react";
+import {
+  Sparkles,
+  Layers,
+  ChevronDown,
+  ArrowRight,
+  Flame,
+  Award,
+} from "lucide-react";
 
 const TOTAL_FRAMES = 50;
 
@@ -18,7 +25,7 @@ export default function ScrollCanvasAnimation() {
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [scrollProgress, setScrollProgress] = useState<number>(0);
 
-  // Preload images progressively
+  // Preload frames progressively
   useEffect(() => {
     let active = true;
     const images: HTMLImageElement[] = [];
@@ -27,26 +34,24 @@ export default function ScrollCanvasAnimation() {
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
       const img = new Image();
       const frameNum = String(i).padStart(3, "0");
-      // Use frame-xxx.jpg with fallback handling to ezgif-frame-xxx.png
       img.src = `/cake_video/frame-${frameNum}.jpg`;
 
       img.onload = () => {
         if (!active) return;
         loaded++;
         setLoadedCount(loaded);
-        if (loaded >= 5) {
+        if (loaded >= 4) {
           setIsLoaded(true);
         }
       };
 
       img.onerror = () => {
-        // Fallback to png
         img.src = `/cake_video/ezgif-frame-${frameNum}.png`;
         img.onload = () => {
           if (!active) return;
           loaded++;
           setLoadedCount(loaded);
-          if (loaded >= 5) setIsLoaded(true);
+          if (loaded >= 4) setIsLoaded(true);
         };
       };
 
@@ -59,6 +64,43 @@ export default function ScrollCanvasAnimation() {
       active = false;
     };
   }, []);
+
+  // Fullscreen Cover render on HTML5 Canvas
+  const renderImageCover = (
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    img: HTMLImageElement
+  ) => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
+
+    ctx.save();
+    ctx.clearRect(0, 0, width, height);
+
+    const imgAspect = img.naturalWidth / img.naturalHeight;
+    const canvasAspect = width / height;
+
+    let drawW: number;
+    let drawH: number;
+
+    // Fullscreen cover fit: occupies entire screen with no letterboxing
+    if (canvasAspect > imgAspect) {
+      drawW = width;
+      drawH = width / imgAspect;
+    } else {
+      drawH = height;
+      drawW = height * imgAspect;
+    }
+
+    const drawX = (width - drawW) / 2;
+    const drawY = (height - drawH) / 2;
+
+    // Draw the image edge-to-edge
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+    ctx.restore();
+  };
 
   // Draw current frame to canvas
   const drawFrame = useCallback((frameIdx: number) => {
@@ -74,93 +116,25 @@ export default function ScrollCanvasAnimation() {
     const img = imagesRef.current[roundedIdx];
 
     if (!img || !img.complete || img.naturalWidth === 0) {
-      // Find closest loaded frame if current isn't ready
       for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
         const prev = imagesRef.current[roundedIdx - offset];
         if (prev && prev.complete && prev.naturalWidth > 0) {
-          renderImageCentered(ctx, canvas, prev);
+          renderImageCover(ctx, canvas, prev);
           return;
         }
         const next = imagesRef.current[roundedIdx + offset];
         if (next && next.complete && next.naturalWidth > 0) {
-          renderImageCentered(ctx, canvas, next);
+          renderImageCover(ctx, canvas, next);
           return;
         }
       }
       return;
     }
 
-    renderImageCentered(ctx, canvas, img);
+    renderImageCover(ctx, canvas, img);
   }, []);
 
-  // Helper to render image cover/contain with luxury backdrop
-  const renderImageCentered = (
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    img: HTMLImageElement
-  ) => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = canvas.width / dpr;
-    const height = canvas.height / dpr;
-
-    ctx.save();
-    ctx.clearRect(0, 0, width, height);
-
-    // Deep espresso gradient backdrop inside canvas
-    const bgGrad = ctx.createRadialGradient(
-      width / 2,
-      height / 2,
-      width * 0.1,
-      width / 2,
-      height / 2,
-      Math.max(width, height) * 0.8
-    );
-    bgGrad.addColorStop(0, "#1d120d");
-    bgGrad.addColorStop(0.5, "#140c08");
-    bgGrad.addColorStop(1, "#0c0806");
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, width, height);
-
-    // Fit image maintain aspect ratio (contain with 88% scale for breathing room)
-    const imgAspect = img.naturalWidth / img.naturalHeight;
-    const canvasAspect = width / height;
-
-    let drawW: number;
-    let drawH: number;
-
-    if (canvasAspect > imgAspect) {
-      drawH = height * 0.86;
-      drawW = drawH * imgAspect;
-    } else {
-      drawW = width * 0.88;
-      drawH = drawW / imgAspect;
-    }
-
-    const drawX = (width - drawW) / 2;
-    const drawY = (height - drawH) / 2;
-
-    // Draw cake frame
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
-    // Soft vignette around edges for seamless integration
-    const vignette = ctx.createRadialGradient(
-      width / 2,
-      height / 2,
-      Math.min(width, height) * 0.35,
-      width / 2,
-      height / 2,
-      Math.max(width, height) * 0.75
-    );
-    vignette.addColorStop(0, "rgba(12, 8, 6, 0)");
-    vignette.addColorStop(0.7, "rgba(12, 8, 6, 0.3)");
-    vignette.addColorStop(1, "rgba(12, 8, 6, 0.95)");
-    ctx.fillStyle = vignette;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.restore();
-  };
-
-  // Resize canvas with devicePixelRatio
+  // Resize canvas
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -186,7 +160,7 @@ export default function ScrollCanvasAnimation() {
     return () => window.removeEventListener("resize", resizeCanvas);
   }, [resizeCanvas]);
 
-  // Scroll listener to compute target frame
+  // Scroll listener
   useEffect(() => {
     const handleScroll = () => {
       const container = containerRef.current;
@@ -197,7 +171,6 @@ export default function ScrollCanvasAnimation() {
 
       if (containerH <= 0) return;
 
-      // Progress from 0 to 1 as container scrolls through viewport
       const rawProgress = -rect.top / containerH;
       const clamped = Math.max(0, Math.min(1, rawProgress));
 
@@ -211,7 +184,7 @@ export default function ScrollCanvasAnimation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Smooth lerp loop with requestAnimationFrame
+  // Smooth lerp loop
   useEffect(() => {
     let running = true;
 
@@ -221,7 +194,6 @@ export default function ScrollCanvasAnimation() {
       const target = targetFrameRef.current;
       const current = currentFrameRef.current;
 
-      // Smooth interpolation (lerp factor ~0.09 for buttery responsiveness)
       const diff = target - current;
       if (Math.abs(diff) > 0.005) {
         currentFrameRef.current += diff * 0.09;
@@ -242,7 +214,6 @@ export default function ScrollCanvasAnimation() {
     };
   }, [drawFrame]);
 
-  // Initial draw once first frame loaded
   useEffect(() => {
     if (isLoaded) {
       drawFrame(0);
@@ -253,142 +224,207 @@ export default function ScrollCanvasAnimation() {
     <div
       id="scroll-craft"
       ref={containerRef}
-      className="relative h-[290vh] bg-[#0c0806]"
+      className="relative h-[300vh] bg-[#0c0908]"
     >
       {/* Sticky Fullscreen Canvas Viewport */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
-        {/* Canvas Element */}
+        {/* Layer z-0: HTML5 Video Canvas occupying 100% fullscreen */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 block w-full h-full object-cover"
+          className="absolute inset-0 block w-full h-full object-cover z-0"
         />
 
-        {/* Loading overlay if buffering */}
+        {/* Layer z-10: Cinematic Vignette & Fade Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0908]/80 via-transparent to-[#0c0908] pointer-events-none z-10" />
+
+        {/* Loading Spinner */}
         {!isLoaded && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0c0806]">
-            <div className="w-16 h-16 rounded-full border-2 border-[#d4a359]/20 border-t-[#d4a359] animate-spin mb-4" />
-            <p className="font-serif text-lg text-[#f5cb88] tracking-wider">
-              Preparing The Culinary Story...
-            </p>
-            <p className="text-xs text-[#ebdccb]/60 mt-1">
-              Loading frames: {loadedCount} / {TOTAL_FRAMES}
-            </p>
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0c0908]">
+            <div className="w-14 h-14 rounded-full border-2 border-[#d4a359]/20 border-t-[#d4a359] animate-spin mb-3" />
+            <span className="font-serif text-sm tracking-widest text-[#f5cb88] uppercase font-semibold">
+              Preparing Culinary Canvas...
+            </span>
           </div>
         )}
 
-        {/* Header HUD overlay */}
-        <div className="absolute top-20 left-6 sm:left-12 z-20 pointer-events-none">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#d4a359]/30 bg-[#160e0a]/80 backdrop-blur-md">
-            <Layers className="w-3.5 h-3.5 text-[#d4a359]" />
-            <span className="text-[10px] sm:text-xs tracking-[0.2em] font-semibold text-[#f5cb88] uppercase">
-              CINEMATIC SCROLL REVEAL
-            </span>
-          </div>
-          <h2 className="font-serif text-2xl sm:text-4xl text-cream-100 font-bold mt-2 drop-shadow-md">
-            The Anatomy of Perfection
-          </h2>
-          <p className="text-xs sm:text-sm text-[#ebdccb]/70 max-w-sm mt-1">
-            Scroll gently to witness every artisanal layer come to life.
-          </p>
-        </div>
-
-        {/* Progress scrub pill indicator */}
-        <div className="absolute top-20 right-6 sm:right-12 z-20 pointer-events-none hidden sm:flex items-center gap-3">
-          <div className="text-right">
-            <span className="text-[10px] tracking-widest text-[#d4a359] uppercase block font-semibold">
-              Frame Sequence
-            </span>
-            <span className="text-xs font-mono text-[#ebdccb]/80">
-              {Math.min(TOTAL_FRAMES, Math.round(currentFrameRef.current + 1))} / {TOTAL_FRAMES}
-            </span>
-          </div>
-          <div className="w-20 h-1.5 rounded-full bg-white/10 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-[#d4a359] to-[#c68642] transition-all duration-75"
-              style={{ width: `${scrollProgress * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Milestone Story Overlays appearing dynamically based on scroll progress */}
-        {/* Milestone 1: 5% - 30% */}
+        {/* ---------------------------------------------------- */}
+        {/* Layer z-20: Floating Hero Text with Warm Gold Glow   */}
+        {/* ---------------------------------------------------- */}
         <div
-          className={`absolute bottom-24 left-6 sm:left-16 z-20 max-w-md transition-all duration-500 pointer-events-none ${
-            scrollProgress >= 0.05 && scrollProgress < 0.32
+          className={`absolute inset-0 z-20 flex flex-col justify-between pt-24 pb-4 sm:pb-6 px-4 sm:px-8 max-w-7xl mx-auto w-full transition-all duration-700 pointer-events-none ${
+            scrollProgress < 0.28
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 -translate-y-8"
+          }`}
+        >
+          {/* Top Hero Text */}
+          <div className="flex flex-col items-center text-center mt-2 sm:mt-6 pointer-events-auto relative">
+            {/* Soft Warm Gold radial glow behind text */}
+            <div
+              className="absolute -inset-x-24 -inset-y-16 rounded-full pointer-events-none -z-10"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, rgba(212,163,89,0.22) 0%, rgba(198,134,66,0.08) 45%, transparent 75%)",
+              }}
+            />
+
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d4a359]/35 bg-[#1b120c]/85 backdrop-blur-md shadow-lg shadow-black/40 mb-5 group hover:border-[#d4a359] transition-all">
+              <Sparkles className="w-3.5 h-3.5 text-[#d4a359] animate-pulse" />
+              <span className="text-[10px] sm:text-xs tracking-[0.25em] font-semibold text-[#f5cb88] uppercase">
+                HATHRAS PREMIER BAKERY
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d4a359]" />
+              <span className="text-[10px] sm:text-xs text-[#dcd7ce]/80 font-normal">
+                100% Eggless
+              </span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-cream-glow leading-[1.08] max-w-4xl">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#fffbf5] via-[#faede0] to-[#d4a359]">
+                Handcrafted
+              </span>{" "}
+              <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#faede0] via-[#e5ba73] to-[#c68642]">
+                Celebration Cakes
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="mt-3.5 text-xs sm:text-sm md:text-base text-[#dcd7ce] max-w-xl font-light leading-relaxed">
+              Bespoke multi-tiered wedding cakes, Belgian chocolate truffles, and
+              handcrafted celebration centerpieces created with love in Hathras.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="mt-6 flex items-center gap-3.5">
+              <a
+                href="#3d-studio"
+                className="px-8 py-3.5 rounded-full btn-gold-gradient text-xs uppercase tracking-wider font-bold shadow-xl flex items-center gap-2 group cursor-pointer"
+              >
+                <span>Order Custom Cake</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </a>
+              <a
+                href="#bento-menu"
+                className="px-6 py-3.5 rounded-full btn-dark-minimal text-xs uppercase tracking-wider font-medium shadow-md"
+              >
+                <span>Discover Menu</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Bottom Brand Anchor "KUMAR'S" */}
+          <div className="w-full text-center pointer-events-auto relative mt-auto">
+            <div
+              className="absolute -inset-x-12 -bottom-4 h-36 rounded-t-3xl pointer-events-none -z-10"
+              style={{
+                background:
+                  "radial-gradient(ellipse at bottom center, rgba(12,9,8,0.95) 0%, rgba(12,9,8,0.7) 60%, transparent 95%)",
+              }}
+            />
+
+            <span className="font-serif font-extrabold tracking-[-0.03em] sm:tracking-[0.01em] select-none text-[18vw] sm:text-[16vw] md:text-[15vw] leading-[0.82] text-transparent bg-clip-text bg-gradient-to-b from-[#fffbf5] via-[#faede0] to-[#bca07e] drop-shadow-[0_12px_45px_rgba(212,163,89,0.3)] block w-full text-center">
+              KUMAR&apos;S
+            </span>
+            <div className="flex items-center justify-between w-full max-w-4xl mx-auto px-4 pt-1 text-[9px] sm:text-xs uppercase tracking-[0.35em] text-[#d4a359]/80 font-medium">
+              <span>Bespoke Confectionery</span>
+              <span>•</span>
+              <span>Hathras, Uttar Pradesh</span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                Scroll to explore <ChevronDown className="w-3 h-3 animate-bounce" />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ---------------------------------------------------- */}
+        {/* MILESTONE STORY OVERLAYS (Appear during scroll)       */}
+        {/* ---------------------------------------------------- */}
+
+        {/* Frame Tracker HUD */}
+        <div
+          className={`absolute top-20 right-6 sm:right-12 z-20 pointer-events-none transition-opacity duration-300 ${
+            scrollProgress > 0.22 ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="px-3.5 py-1.5 rounded-full bg-[#1b120c]/85 backdrop-blur-md border border-[#d4a359]/30 shadow-lg flex items-center gap-2.5 text-xs text-[#f5f5f0]">
+            <Layers className="w-3.5 h-3.5 text-[#d4a359]" />
+            <span className="font-mono text-[11px] font-semibold text-[#f5cb88]">
+              Frame {Math.min(TOTAL_FRAMES, Math.round(currentFrameRef.current + 1))} / {TOTAL_FRAMES}
+            </span>
+          </div>
+        </div>
+
+        {/* Milestone 1: 28% - 55% */}
+        <div
+          className={`absolute bottom-20 left-6 sm:left-16 z-20 max-w-md transition-all duration-500 pointer-events-none ${
+            scrollProgress >= 0.28 && scrollProgress < 0.58
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-6"
           }`}
         >
-          <div className="p-5 sm:p-6 rounded-2xl glass-panel shadow-2xl">
+          <div className="p-6 rounded-3xl glass-dark shadow-2xl">
             <div className="flex items-center gap-2 text-[#d4a359] text-xs font-semibold tracking-wider uppercase mb-1">
               <Sparkles className="w-4 h-4" />
-              <span>Phase I • Sponge & Essence</span>
+              <span>Phase 01 • Cloud Sponge Alchemy</span>
             </div>
-            <h3 className="font-serif text-xl sm:text-2xl text-[#fff9f2] font-bold">
-              Slow-Baked Cloud Sponge
+            <h3 className="font-serif text-xl sm:text-2xl text-[#f5f5f0] font-bold">
+              Slow-Baked Sponge
             </h3>
-            <p className="text-xs sm:text-sm text-[#ebdccb]/80 mt-1.5 leading-relaxed">
-              Infused with pure Madagascar vanilla and organic cacao, whipped to
-              delicate airy perfection for a melt-in-the-mouth texture.
+            <p className="text-xs sm:text-sm text-[#dcd7ce] mt-1.5 leading-relaxed font-light">
+              Infused with pure Madagascar vanilla and organic cocoa, whipped to
+              airy perfection for a melt-in-the-mouth texture.
             </p>
           </div>
         </div>
 
-        {/* Milestone 2: 35% - 65% */}
+        {/* Milestone 2: 58% - 85% */}
         <div
-          className={`absolute bottom-24 right-6 sm:right-16 z-20 max-w-md transition-all duration-500 pointer-events-none ${
-            scrollProgress >= 0.35 && scrollProgress < 0.65
+          className={`absolute bottom-20 right-6 sm:right-16 z-20 max-w-md transition-all duration-500 pointer-events-none ${
+            scrollProgress >= 0.58 && scrollProgress < 0.85
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-6"
           }`}
         >
-          <div className="p-5 sm:p-6 rounded-2xl glass-panel shadow-2xl">
+          <div className="p-6 rounded-3xl glass-dark shadow-2xl">
             <div className="flex items-center gap-2 text-[#d4a359] text-xs font-semibold tracking-wider uppercase mb-1">
               <Flame className="w-4 h-4" />
-              <span>Phase II • The Rich Ganache</span>
+              <span>Phase 02 • Belgian Truffle Ganache</span>
             </div>
-            <h3 className="font-serif text-xl sm:text-2xl text-[#fff9f2] font-bold">
-              54% Dark Belgian Truffle
+            <h3 className="font-serif text-xl sm:text-2xl text-[#f5f5f0] font-bold">
+              54% Dark Chocolate Core
             </h3>
-            <p className="text-xs sm:text-sm text-[#ebdccb]/80 mt-1.5 leading-relaxed">
-              Cascading silky ganache layered with toasted hazelnut crunch and
-              warm caramel ribboning between velvety crumbs.
+            <p className="text-xs sm:text-sm text-[#dcd7ce] mt-1.5 leading-relaxed font-light">
+              Silky ganache folded with toasted hazelnut crunch and warm caramel
+              ribbons for deep, luxurious chocolate intensity.
             </p>
           </div>
         </div>
 
-        {/* Milestone 3: 68% - 98% */}
+        {/* Milestone 3: 85% - 100% */}
         <div
-          className={`absolute bottom-24 left-1/2 -translate-x-1/2 z-20 w-[90%] max-w-xl transition-all duration-500 pointer-events-none text-center ${
-            scrollProgress >= 0.68
+          className={`absolute bottom-20 left-1/2 -translate-x-1/2 z-20 w-[90%] max-w-lg transition-all duration-500 pointer-events-none text-center ${
+            scrollProgress >= 0.85
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-6"
           }`}
         >
-          <div className="p-5 sm:p-6 rounded-2xl glass-panel shadow-2xl mx-auto">
+          <div className="p-6 rounded-3xl glass-dark shadow-2xl mx-auto">
             <div className="inline-flex items-center gap-2 text-[#d4a359] text-xs font-semibold tracking-wider uppercase mb-1">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Phase III • Crown Jewel Finish</span>
+              <Award className="w-4 h-4" />
+              <span>Phase 03 • Crown Jewel Finish</span>
             </div>
-            <h3 className="font-serif text-xl sm:text-2xl text-[#fff9f2] font-bold">
+            <h3 className="font-serif text-xl sm:text-2xl text-[#f5f5f0] font-bold">
               24K Gold Leaf & Edible Florals
             </h3>
-            <p className="text-xs sm:text-sm text-[#ebdccb]/80 mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#dcd7ce] mt-1.5 leading-relaxed font-light">
               Every detail sculpted by master confectioners in Hathras. Your
-              celebration deserves nothing less than regal magnificence.
+              celebration deserves nothing less than royal magnificence.
             </p>
           </div>
-        </div>
-
-        {/* Bottom subtle scroll prompt */}
-        <div
-          className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-20 text-center transition-opacity duration-300 pointer-events-none ${
-            scrollProgress > 0.92 ? "opacity-0" : "opacity-75"
-          }`}
-        >
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#d4a359] font-medium">
-            Scroll down to continue tour
-          </span>
         </div>
       </div>
     </div>
